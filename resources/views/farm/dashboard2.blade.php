@@ -80,6 +80,7 @@
 									</tr>
 						  		</thead>
 						  		<tbody>
+						  			<?php if(!empty($data)){ ?>
 						  			<tr>
 						  				<td style="font-size: 12px;">Nitrogen (N) </td>
 						  				<td style="font-size: 12px;"><a onclick="getDetails(<?= $data['Nitrogen']['id_state']; ?>)" style="cursor: pointer;"><?= $data['Nitrogen']['state']; ?></a></td>
@@ -117,14 +118,32 @@
 						  			</tr>
 						  			<tr>
 						  				<td style="font-size: 12px;">Outside Temperature	</td>
+						  				<?php if(!empty($data['Outside Temperature'])){ ?>
 						  				<td style="font-size: 12px;"><a onclick="getDetails(<?= $data['Outside Temperature']['id_state']; ?>)" style="cursor: pointer;"><?= $data['Outside Temperature']['state']; ?></a></td>
+						  				<?php } else { ?>
+						  				<td>No Data</td>
+						  				<?php } ?>
+
+						  				<?php if(!empty($data['Outside Temperature Old'])){ ?>
 						  				<td style="font-size: 12px;"><a onclick="getDetails(<?= $data['Outside Temperature Old']['id_state']; ?>)" style="cursor: pointer;"><?= $data['Outside Temperature Old']['state']; ?></a></td>
+						  				<?php } else { ?>
+						  				<td>No Data</td>
+						  				<?php } ?>
 						  			</tr>
 						  			<tr>
 						  				<td style="font-size: 12px;">Humidity </td>
+						  				<?php if(!empty($data['Outside Temperature'])){ ?>
 						  				<td style="font-size: 12px;"><a onclick="getDetails(<?= $data['Humidity']['id_state']; ?>)" style="cursor: pointer;"><?= $data['Humidity']['state']; ?></a></td>
+						  				<?php } else { ?>
+						  				<td>No Data</td>
+						  				<?php } ?>
+						  				<?php if(!empty($data['Outside Temperature'])){ ?>
 						  				<td style="font-size: 12px;"><a onclick="getDetails(<?= $data['Humidity Old']['id_state']; ?>)" style="cursor: pointer;"><?= $data['Humidity Old']['state']; ?></a></td>
+						  				<?php } else { ?>
+						  				<td>No Data</td>
+						  				<?php } ?>
 						  			</tr>
+						  			<?php } ?>
 						  		</tbody>
 						  	</table>
 

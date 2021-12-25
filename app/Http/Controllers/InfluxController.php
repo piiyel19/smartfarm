@@ -130,6 +130,7 @@ class InfluxController extends Controller
 
     function create_item_configuration(request $request)
     {
+        $id_no = $request->id_no;
         $name_plant = $request->name_plant;
         $iot_sensor = $request->iot_sensor;
         $parameter = $request->parameter;
@@ -185,37 +186,88 @@ class InfluxController extends Controller
         //dd($path);
 
 
+        if(!empty($id_no)){
 
-        $check = DB::table('data_conf_register')->where('id_plant',$id_plant)->get();
-        if(count($check)>0){
-
-
+            if(!empty($path)){
+                DB::table('data_conf_item')
+                ->where('id',$id_no)
+                ->update([
+                    'iot_sensor'=>$iot_sensor,
+                    'parameter'=>$parameter,
+                    'range_start'=>$range_start,
+                    'range_end'=>$range_end,
+                    'analysis'=>$analysis,
+                    'effect'=>$effect,
+                    'correction'=>$correction,
+                    'id_plant'=>$id_plant,
+                    'additional_text'=>$additional_text,
+                    'filename'=>$path,
+                    'extension'=>$extension
+                ]);
+            } else {
+                DB::table('data_conf_item')
+                ->where('id',$id_no)
+                ->update([
+                    'iot_sensor'=>$iot_sensor,
+                    'parameter'=>$parameter,
+                    'range_start'=>$range_start,
+                    'range_end'=>$range_end,
+                    'analysis'=>$analysis,
+                    'effect'=>$effect,
+                    'correction'=>$correction,
+                    'id_plant'=>$id_plant,
+                    'additional_text'=>$additional_text
+                ]);
+            }
 
         } else {
-            $date = date('Y-m-d H:i:s');
 
-            DB::table('data_conf_register')->insert([
+
+            $check = DB::table('data_conf_register')->where('id_plant',$id_plant)->get();
+            if(count($check)>0){
+
+
+
+            } else {
+                $date = date('Y-m-d H:i:s');
+
+                DB::table('data_conf_register')->insert([
+                    'id_plant'=>$id_plant,
+                    'name_plant'=>$name_plant,
+                    'created_date'=>$date
+                ]);
+            }
+
+
+            DB::table('data_conf_item')
+            ->insert([
+                'iot_sensor'=>$iot_sensor,
+                'parameter'=>$parameter,
+                'range_start'=>$range_start,
+                'range_end'=>$range_end,
+                'analysis'=>$analysis,
+                'effect'=>$effect,
+                'correction'=>$correction,
                 'id_plant'=>$id_plant,
-                'name_plant'=>$name_plant,
-                'created_date'=>$date
+                'additional_text'=>$additional_text,
+                'filename'=>$path,
+                'extension'=>$extension
             ]);
+
+
+        }
+    }
+
+
+    function get_details_item(Request $request)
+    {
+        $id = $request->id;
+        $data = DB::table('data_conf_item')->where('id',$id)->first();
+        if(!empty($data)){
+            echo json_encode($data);
         }
 
-
-        DB::table('data_conf_item')
-        ->insert([
-            'iot_sensor'=>$iot_sensor,
-            'parameter'=>$parameter,
-            'range_start'=>$range_start,
-            'range_end'=>$range_end,
-            'analysis'=>$analysis,
-            'effect'=>$effect,
-            'correction'=>$correction,
-            'id_plant'=>$id_plant,
-            'additional_text'=>$additional_text,
-            'filename'=>$path,
-            'extension'=>$extension
-        ]);
+        echo '';
     }
 
 
@@ -600,38 +652,41 @@ class InfluxController extends Controller
         $high_state = '';
         $low_state = '';
 
-        foreach($points_weather as $key => $val)
-        {
-            //dd($val);
-            $influTime = $val["time"];
-            $Humidity = $val["Humidity"];
-            $Temperature = $val["Temperature"];
-            $UVRadiation = $val["UVRadiation"];
-            $SolarRadiationPower = $val["SolarRadiationPower"];
-            $AccumulatedSolarRadiation = $val["AccumulatedSolarRadiation"];
-            $UVRadiation = $val["UVRadiation"];
-            $data['Humidity'] = $this->check_state('Humidity',$Humidity,$plant);
-            $data['Outside Temperature'] = $this->check_state('Outside Temperature',$Temperature,$plant);
 
-            if($data['Humidity']["state"]=='High'){
-                $high_state .= '<tr><td>Humidity</td><td><a onclick="getDetails('.$data['Humidity']["id_state"].')">High</a></td></tr>';
-            }
+        if(!empty($points_weather)){
+            foreach($points_weather as $key => $val)
+            {
+                //dd($val);
+                $influTime = $val["time"];
+                $Humidity = $val["Humidity"];
+                $Temperature = $val["Temperature"];
+                $UVRadiation = $val["UVRadiation"];
+                $SolarRadiationPower = $val["SolarRadiationPower"];
+                $AccumulatedSolarRadiation = $val["AccumulatedSolarRadiation"];
+                $UVRadiation = $val["UVRadiation"];
+                $data['Humidity'] = $this->check_state('Humidity',$Humidity,$plant);
+                $data['Outside Temperature'] = $this->check_state('Outside Temperature',$Temperature,$plant);
 
-
-            if($data['Humidity']["state"]=='Low'){
-                $low_state .= '<tr><td>Humidity</td><td><a onclick="getDetails('.$data['Humidity']["id_state"].')">Low</a></td></tr>';
-            }
+                if($data['Humidity']["state"]=='High'){
+                    $high_state .= '<tr><td>Humidity</td><td><a onclick="getDetails('.$data['Humidity']["id_state"].')">High</a></td></tr>';
+                }
 
 
+                if($data['Humidity']["state"]=='Low'){
+                    $low_state .= '<tr><td>Humidity</td><td><a onclick="getDetails('.$data['Humidity']["id_state"].')">Low</a></td></tr>';
+                }
 
 
-            if($data['Outside Temperature']["state"]=='High'){
-                $high_state .= '<tr><td>Outside Temperature</td><td><a onclick="getDetails('.$data['Outside Temperature']["id_state"].')">High</a></td></tr>';
-            }
 
 
-            if($data['Outside Temperature']["state"]=='Low'){
-                $low_state .= '<tr><td>Outside Temperature</td><td><a onclick="getDetails('.$data['Outside Temperature']["id_state"].')">Low</a></td></tr>';
+                if($data['Outside Temperature']["state"]=='High'){
+                    $high_state .= '<tr><td>Outside Temperature</td><td><a onclick="getDetails('.$data['Outside Temperature']["id_state"].')">High</a></td></tr>';
+                }
+
+
+                if($data['Outside Temperature']["state"]=='Low'){
+                    $low_state .= '<tr><td>Outside Temperature</td><td><a onclick="getDetails('.$data['Outside Temperature']["id_state"].')">Low</a></td></tr>';
+                }
             }
         }
 
@@ -642,18 +697,20 @@ class InfluxController extends Controller
         $result_weather2 = $db_weather->query($sql2);
         $points_weather2 = $result_weather2->getPoints();
 
-        foreach($points_weather2 as $key2 => $val2)
-        {
-            //dd($val);
-            $influTime = $val2["time"];
-            $Humidity = $val2["Humidity"];
-            $Temperature = $val2["Temperature"];
-            $UVRadiation = $val2["UVRadiation"];
-            $SolarRadiationPower = $val2["SolarRadiationPower"];
-            $AccumulatedSolarRadiation = $val2["AccumulatedSolarRadiation"];
-            $UVRadiation = $val2["UVRadiation"];
-            $data['Humidity Old'] = $this->check_state('Humidity',$Humidity,$plant);
-            $data['Outside Temperature Old'] = $this->check_state('Outside Temperature',$Temperature,$plant);
+        if(!empty($points_weather2)){
+            foreach($points_weather2 as $key2 => $val2)
+            {
+                //dd($val);
+                $influTime = $val2["time"];
+                $Humidity = $val2["Humidity"];
+                $Temperature = $val2["Temperature"];
+                $UVRadiation = $val2["UVRadiation"];
+                $SolarRadiationPower = $val2["SolarRadiationPower"];
+                $AccumulatedSolarRadiation = $val2["AccumulatedSolarRadiation"];
+                $UVRadiation = $val2["UVRadiation"];
+                $data['Humidity Old'] = $this->check_state('Humidity',$Humidity,$plant);
+                $data['Outside Temperature Old'] = $this->check_state('Outside Temperature',$Temperature,$plant);
+            }
         }
 
 

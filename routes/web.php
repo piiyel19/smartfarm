@@ -104,3 +104,4 @@ Route::post('edit_new_user', 'InfluxController@edit_new_user')->name('edit_new_u
 
 Route::post('getDetails_configuration', 'InfluxController@getDetails_configuration')->name('getDetails_configuration');
 Route::post('multispectra', 'InfluxController@multispectra')->name('multispectra');
+Route::post('get_details_item', 'InfluxController@get_details_item')->name('get_details_item');

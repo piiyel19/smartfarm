@@ -38,9 +38,10 @@
 							<form method="post" action="" enctype="multipart/form-data" id="myform">
 								@csrf
 								<div class="row">
-									<div class="col-md-12" style="font-size: 15px; padding-bottom: 10px;">
+									<div class="col-md-12 myform" style="font-size: 15px; padding-bottom: 10px;">
 										
 										<input type="hidden" name="id_plant" value="<?= rand(); ?>">
+										<input type="hidden" name="id_no">
 										<div class="row">
 											<div class="col-md-4" style="padding-bottom: 10px;">
 												<label>Name Of Plant</label>
@@ -167,7 +168,7 @@
 
 									
 
-									<div class="col-md-12">
+									<div class="col-md-12 myform">
 
 										<div class="row">
 
@@ -175,9 +176,9 @@
 												<br>
 												
 												<?php if(Request::segment(1)=='data_configuration'){ ?>
-												<button class="btn btn-success" style="float: right;" onclick="saveData();">Submit</button>
+												<button type="button" class="btn btn-success" style="float: right;" onclick="saveData();">Submit</button>
 												<?php } else { ?>
-												<button class="btn btn-success" style="float: right;" onclick="addItemEdit();">Save Edit</button>
+												<button type="button" class="btn btn-success" style="float: right; display: none" onclick="addItemEdit();" id="btnEdit">Save Edit</button>
 												<?php } ?>
 											</div>
 
@@ -281,6 +282,11 @@
 			get_list_plant();
 
 
+			<?php if(Request::segment(1)!='data_configuration'){ ?>
+				$(".myform").hide();
+			<?php } ?>
+
+
 			<?php 
 				if(!empty($id_plant)){
 			?>
@@ -316,6 +322,59 @@
 			
 
 		});
+
+
+		function editItem(id)
+		{
+			var id_plant = $("input[name='id_plant']").val();
+
+			var data = {
+					'id':id,
+					"_token": "{{ csrf_token() }}"
+				}
+
+			$.ajax({
+	                url: "<?= url('/')?>/get_details_item",
+	                type: "POST",
+	                data: data,
+	                dataType: "json",
+	                success:function(data) {
+
+	                	if(data){
+	                		$("#btnEdit").show();
+	                		$(".myform").show();
+	                		var additional_text = data.additional_text;
+	                		var analysis = data.analysis;
+	                		var correction = data.correction;
+	                		var effect = data.effect;
+	                		var iot_sensor = data.iot_sensor;
+	                		var id_plant = data.id_plant;
+	                		var parameter = data.parameter;
+	                		var range_end = data.range_end;
+	                		var range_start = data.range_start;
+
+	                		$("input[name='id_no']").val(id);
+
+							$("select[name='iot_sensor']").val(iot_sensor);
+							$("select[name='parameter']").val(parameter);
+							$("input[name='range_start']").val(range_start);
+							$("input[name='range_end']").val(range_end);
+							$("textarea[name='analysis']").val(analysis);
+							$("textarea[name='effect']").val(effect);
+							$("textarea[name='correction']").val(correction);
+							$("textarea[name='additional_text']").val(additional_text);
+
+
+							$("html, body").animate({
+						        scrollTop: 0
+						    }, 1000); 
+	                	} else {
+	                		$("#btnEdit").hide();
+	                		$(".myform").hide();
+	                	}
+	                }	
+	               });
+		}
 
 		function addItem()
 		{
@@ -379,6 +438,7 @@
 				data.append('id_plant',id_plant);
 				data.append('additional_text',additional_text);
 				data.append('_token',"{{ csrf_token() }}");
+				data.append('id_no','');
 
 
 				$.ajax({
@@ -412,6 +472,8 @@
 
 		function addItemEdit()
 		{
+
+			var id_no = $("input[name='id_no']").val();
 			var name_plant = $("input[name='name_plant']").val();
 			var iot_sensor = $("select[name='iot_sensor']").val();
 			var parameter = $("select[name='parameter']").val();
@@ -439,7 +501,8 @@
 				(analysis=='')||
 				(effect=='')||
 				(correction=='')||
-				(id_plant=='')
+				(id_plant=='') ||
+				(id_no=='')
 			  )
 			{
 				alert('Please fill in the form !');
@@ -472,6 +535,7 @@
 				data.append('id_plant',id_plant);
 				data.append('additional_text',additional_text);
 				data.append('_token',"{{ csrf_token() }}");
+				data.append('id_no',id_no);
 
 
 				$.ajax({
@@ -496,7 +560,7 @@
 						get_list_item();
 
 						alert('Success');
-						location.reload();
+						//location.reload();
 
 	                }
 	            });
